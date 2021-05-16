@@ -1,0 +1,25 @@
+##VERTEX
+
+#version 330
+
+in vec3 position;
+
+uniform mat4 projMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 modelMatrix;
+
+
+void main()
+{
+	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+}
+
+##FRAGMENT
+
+#version 330
+
+out vec4 outColour;
+void main()
+{
+	outColour = vec4(0.0, 0.6, 0.6, 1.0);
+}

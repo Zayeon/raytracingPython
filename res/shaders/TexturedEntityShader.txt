@@ -1,0 +1,69 @@
+##VERTEX
+
+#version 330
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 textureCoords;
+layout(location = 2) in vec3 normal;
+
+uniform mat4 projMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 modelMatrix;
+uniform vec3 lightPosition[4];
+
+out vec2 passTextureCoords;
+out vec3 surfaceNormal;
+out vec3 toLightVector[4];
+out vec3 toCameraVector;
+
+void main()
+{
+    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+	gl_Position = projMatrix * viewMatrix * worldPosition;
+	passTextureCoords = textureCoords;
+	surfaceNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
+	for(int i=0; i<4; i++){
+        toLightVector[i] = lightPosition[i] - worldPosition.xyz;
+	}
+    toCameraVector = (inverse(viewMatrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz - worldPosition.xyz;
+}
+
+##FRAGMENT
+
+#version 330
+
+in vec2 passTextureCoords;
+in vec3 surfaceNormal;
+in vec3 toLightVector[4];
+in vec3 toCameraVector;
+
+uniform sampler2D samplerTexture;
+uniform vec3 lightColour[4];
+uniform float shineDamper;
+uniform float reflectivity;
+
+
+out vec4 outColour;
+void main()
+{
+    vec3 unitNormal = normalize(surfaceNormal);
+    vec3 unitCameraVector = normalize(toCameraVector);
+
+    vec3 totalDiffuse = vec3(0.0);
+    vec3 totalSpecular = vec3(0.0);
+
+    for(int i=0; i<4; i++){
+        vec3 unitLightVector = normalize(toLightVector[i]);
+        float nDot1 = dot(unitNormal, unitLightVector);
+        float brightness = max(nDot1, 0.0);
+        vec3 lightDirection = -unitLightVector;
+        vec3 reflectedLightVector = reflect(lightDirection, unitNormal);
+        float specularFactor = dot(reflectedLightVector, unitCameraVector);
+        specularFactor = max(specularFactor, 0.0);
+        float dampedFactor = pow(specularFactor, shineDamper);
+        totalDiffuse += brightness * lightColour[i];
+        totalSpecular += dampedFactor * reflectivity * lightColour[i];
+    }
+    totalDiffuse = max(totalDiffuse, 0.2);
+	outColour = vec4(totalDiffuse, 1.0) * texture(samplerTexture, passTextureCoords) + vec4(totalSpecular, 1.0);
+}
