@@ -1,0 +1,29 @@
+##VERTEX
+
+#version 430
+
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 textureCoords;
+
+out vec2 passTextureCoords;
+
+void main()
+{
+	gl_Position = vec4(position, 0.0, 1.0);
+	passTextureCoords = textureCoords;
+}
+
+##FRAGMENT
+
+#version 430
+
+in vec2 passTextureCoords;
+
+uniform sampler2D samplerTexture;
+
+out vec4 outColour;
+
+void main()
+{
+    outColour = texture(samplerTexture, passTextureCoords);
+}

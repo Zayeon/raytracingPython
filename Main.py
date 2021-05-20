@@ -5,6 +5,7 @@ from OpenGL.GL import *
 from core import Audio, GUI, DisplayManager, RenderEngine
 from core.Camera import Camera
 from entities import Entities
+from raytracing.RayTracer import RayTracer
 
 window = DisplayManager.Window()
 
@@ -42,7 +43,11 @@ audioContext = Audio.createContext()
 Audio.setListenerData(0, 0, 0)
 buffer = Audio.loadSound("res/sounds/bounce.wav")
 source = Audio.Source()
-print("starting rendering")
+
+# RAY TRACING
+rayTracer = RayTracer(512, 512)
+
+# LOOP
 glClearColor(0.0, 0.0, 0.0, 1.0)
 while not window.shouldClose():
     window.startFrame()
@@ -52,6 +57,8 @@ while not window.shouldClose():
 
     masterRenderer.renderScene(cam, entities, [], lights)
     # masterRenderer.renderGUI(myGUI)
+
+    rayTracer.render()
 
     if window.getKeyState(glfw.KEY_M) == glfw.PRESS:
         if not source.isPlaying():
