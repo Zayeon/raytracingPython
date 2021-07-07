@@ -9,7 +9,16 @@ const float maxY = 5.0;
 // Hard-coded sphere
 const vec3 sphereC = vec3(0.0, 0.0, -10.0);
 const float sphereR = 1.0;
+const float sphereSpecular = .5;
+const float sphereShininess = 32;
 
+// Light
+const float ambientLight  = 0.1f;
+const vec3 lightPosition = vec3(5.0, 15.0, 0.0);
+const vec3 lightColor = vec3(1.0, 1.0, 1.0);
+
+// Camera
+vec3 cameraPos = vec3(0.0, 0.0, 100.0);
 
 void main() {
   // base pixel colour for image
@@ -20,19 +29,42 @@ void main() {
 
   // Calculating the ray for this pixel
   ivec2 dims = imageSize(imgOutput);
-  float x = (float(pixelCoords.x * 2 - dims.x) / dims.x);
+  float x = -(float(pixelCoords.x * 2 - dims.x) / dims.x);
   float y = (float(pixelCoords.y * 2 - dims.y) / dims.y);
   vec3 rayO = vec3(x * maxX, y * maxY, 0.0);
-  vec3 rayD = vec3(0.0, 0.0, -1.0);
+  vec3 rayD = normalize(rayO - cameraPos); //vec3(0.0, 0.0, -1.0);
 
+  // Calculating sphere intersection
   vec3 omc = rayO - sphereC;
+  float a = dot(rayD, rayD);
   float b = dot(rayD, omc);
   float c = dot(omc, omc) - sphereR * sphereR;
   float bsqmc = b * b - c;
 
   // hit one or both sides
   if (bsqmc >= 0.0) {
-    pixel = vec4(0.4, 0.4, 1.0, 1.0);
+    // Do lighting
+    float t0 = (-b - bsqmc) / 2 * a;
+    float t1 = (-b + bsqmc) / 2 * a;
+
+    vec3 pHit = rayO + t0 * rayD;
+    vec3 lightD = normalize(lightPosition - pHit);
+
+    vec3 normal = normalize(pHit - sphereC);
+    float diff = max(dot(normal, lightD), 0.0);
+    vec3 diffuse = diff * lightColor;
+
+    vec3 viewD = normalize(cameraPos - pHit);
+    vec3 reflectDir = reflect(-lightD, normal);
+    float spec = pow(max(dot(viewD, reflectDir), 0.0), sphereShininess);
+    vec3 specular = sphereSpecular * spec * lightColor;
+
+    vec3 objectColor = vec3(0.4, 0.4, 1.0)* (ambientLight + diffuse + specular);
+
+    pixel = vec4(objectColor, 1.0);
+
+
+
   }
 
 

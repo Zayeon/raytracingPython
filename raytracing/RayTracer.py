@@ -2,12 +2,14 @@
 
 import numpy as np
 from OpenGL.GL import *
-from core.Loader import Shader, RawModel
-
+from core.Loader import Shader, RawModel, TextureAtlas
 class RayTracer:
     def __init__(self, texWidth, texHeight):
         self.texWidth = texWidth
         self.texHeight = texHeight
+
+        # Creating a test texture
+        # self.testTex = TextureAtlas.importFile("res/textures/example.jpg", 1)
 
         # Generating a texture the compute shader can output to
         self.texOutput = glGenTextures(1)
@@ -52,18 +54,16 @@ class RayTracer:
         # Creating the quad to draw using texture from compute shader
         self.quadShader = Shader("raytracing\\QuadShader.txt")
         vertices = np.array([
-            -0.5, -0.5,
-            -0.5, 0.5,
-            0.5, 0.5,
-            0.5, -0.5
+            -1, -1,
+            -1, 1,
+            1, 1,
+            1, -1
         ], dtype=np.float32)
         texCoords = np.array([
-            0, 1,
             0, 0,
-            1, 0,
-            1, 0,
+            0, 1,
             1, 1,
-            0, 1
+            1, 0
         ], dtype=np.float32)
         quadIndices = np.array([
             0, 1, 3,
@@ -85,6 +85,7 @@ class RayTracer:
         self.quadShader.bind()
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.texOutput)
+        # glBindTexture(GL_TEXTURE_2D, self.testTex.getID())
         glBindVertexArray(self.quadModel.getID())
         glEnableVertexAttribArray(0)
         glEnableVertexAttribArray(1)

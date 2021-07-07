@@ -45,17 +45,17 @@ buffer = Audio.loadSound("res/sounds/bounce.wav")
 source = Audio.Source()
 
 # RAY TRACING
-rayTracer = RayTracer(512, 512)
+rayTracer = RayTracer(1024, 1024)
 
 # LOOP
-glClearColor(0.0, 0.0, 0.0, 1.0)
+glClearColor(1.0, 0.0, 0.0, 1.0)
 while not window.shouldClose():
     window.startFrame()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     cam.handleKeyboardInput()
 
-    masterRenderer.renderScene(cam, entities, [], lights)
+    # masterRenderer.renderScene(cam, entities, [], lights)
     # masterRenderer.renderGUI(myGUI)
 
     rayTracer.render()
